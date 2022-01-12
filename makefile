@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 run:
-	go run main.go
+	go run app/services/sales-api/main.go | go run app/tooling/logfmt/main.go
 
 build:
 	go build -ldflags "-X main.build=local"
@@ -9,19 +9,6 @@ build:
 # ==============================================================================
 # Building containers
 
-<<<<<<< HEAD
-VERSION := 1.0
-
-all: service
-
-service:
-	docker build \
-		-f zarf/docker/dockerfile \
-		-t service-amd64:$(VERSION) \
-		--build-arg BUILD_REF=$(VERSION) \
-		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-		.
-=======
 # $(shell git rev-parse --short HEAD)
 VERSION := 1.0
 
@@ -72,14 +59,14 @@ kind-status-sales:
 	kubectl get pods -o wide --watch
 
 kind-logs:
-	kubectl logs -l app=sales --all-containers=true -f --tail=100
+	kubectl logs -l app=sales --all-containers=true -f --tail=100 | go run app/tooling/logfmt/main.go
 
 kind-restart:
 	kubectl rollout restart deployment sales-pod
 
 kind-update: all kind-load kind-restart
 
-kind-update-apply: all kind-load kind-apply
+kind-update-apply: all kind-load kind-apply kind-restart
 
 kind-describe:
 	kubectl describe pod -l app=service
@@ -95,4 +82,3 @@ deps-reset:
 tidy:
 	go mod tidy
 	go mod vendor
->>>>>>> cc7922d92cbfb370cc2357cc1121fcec1406e9eb
